@@ -24,18 +24,19 @@ object sequentialSingleton {
       val sc = new SparkContext(sparkConf)
       val graph = GraphReader.read(sc)
       val automata = GraphReader.automata(sc)
+      val startTime = System.currentTimeMillis 
       var currentNodes = graph.vertices.map(v=>v._1)
       var currentTrans = automata.edges.filter(e=>e.srcId==1L)
       while(currentNodes.count()>0 && currentTrans.count()>0){
-        val tempEdges = graph.edges.cartesian(currentTrans).filter{case(a,b)=>a.attr==b.attr}
-        var currentEdges = tempEdges.map{case(a,b)=>a}
+        val nextEdges = graph.edges.cartesian(currentNodes).filter(v=>v._1.srcId==v._2).map(v=>v._1)
+        val currentEdges = nextEdges.cartesian(currentTrans).filter(v=>v._1.attr==v._2.attr).map(v=>v._1)
         //currentEdges.collect().map(v=>println("edge reached!!! "+v))
-        val tempTrans = currentTrans.cartesian(automata.edges).filter{case (a,b)=>a.dstId==b.srcId}
-        currentTrans = tempTrans.map{case (a,b)=>b}
+        currentTrans = currentTrans.cartesian(automata.edges).filter(v=>v._1.dstId==v._2.srcId).map(v=>v._2)
         //currentTrans.collect().map(v=>println("trans reached!!! "+v))
         currentNodes = currentEdges.map(e=>e.dstId)
       }
+      val endTime = System.currentTimeMillis
       currentNodes.collect().map(v=>println("vertex reached!!! "+v))
-      
+      println("time : "+(endTime-startTime))
     }
 }

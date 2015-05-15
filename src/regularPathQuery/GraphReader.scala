@@ -66,7 +66,7 @@ object GraphReader {
                        ))
       val trans = sc.parallelize(Array(
                     Edge(1L, 2L, "category"),    
-                    Edge(2L, 3L, "music")
+                    Edge(2L, 3L, "Entertainment")
                   ))
       val defaultUser = ("John Doe", "Missing")
       val graph = Graph(states, trans,defaultUser)
